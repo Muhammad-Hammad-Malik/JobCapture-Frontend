@@ -1,3 +1,3 @@
-// Change this to your deployed backend URL before/at deploy time.
-// For local testing against the backend running on this machine, leave as-is.
-const API_BASE_URL = 'http://localhost:3000';
+// Points at the deployed backend. For local dev against a backend running on this machine,
+// temporarily swap this to 'http://localhost:3000'.
+const API_BASE_URL = 'https://job-capture-backend.vercel.app';
