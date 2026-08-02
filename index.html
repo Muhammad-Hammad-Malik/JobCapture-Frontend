@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobCapture</title>
+  <meta name="description" content="Job openings shared by friends — search, filter, and browse." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%234F46E5'/%3E%3Cpath fill='white' d='M17 5H7a1 1 0 0 0-1 1v13l6-3 6 3V6a1 1 0 0 0-1-1z'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">JobCapture</span>
+      </div>
+      <p class="tagline">Fresh openings shared by people we know — updated as they come in.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="filter-bar" aria-label="Search and filters">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="search-input" type="search" placeholder="Search title, company, or description…" aria-label="Search jobs" />
+        </div>
+        <button id="toggle-filters" class="btn btn-outline filters-toggle" aria-expanded="false" aria-controls="filter-fields">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Filters
+        </button>
+      </div>
+
+      <div id="filter-fields" class="filter-fields">
+        <div class="field">
+          <label for="filter-stack">Stack</label>
+          <select id="filter-stack">
+            <option value="">Any</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="filter-remote">Work type</label>
+          <select id="filter-remote">
+            <option value="">Any</option>
+            <option value="remote">Remote</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="onsite">Onsite</option>
+          </select>
+        </div>
+
+        <div class="field field-range">
+          <label>Experience (years)</label>
+          <div class="range-inputs">
+            <input id="filter-min-exp" type="number" min="0" placeholder="Min" aria-label="Minimum experience" />
+            <span class="range-sep">–</span>
+            <input id="filter-max-exp" type="number" min="0" placeholder="Max" aria-label="Maximum experience" />
+          </div>
+        </div>
+
+        <button id="clear-filters" class="btn btn-text">Clear all</button>
+      </div>
+
+      <div class="active-chips" id="active-chips" aria-live="polite"></div>
+    </section>
+
+    <div class="results-meta">
+      <p id="results-count" aria-live="polite"></p>
+    </div>
+
+    <section id="state-loading" class="state-panel" hidden>
+      <div class="skeleton-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+
+    <section id="state-error" class="state-panel" hidden>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <h2>Couldn't load jobs</h2>
+        <p id="error-message">Something went wrong talking to the server.</p>
+        <button id="retry-button" class="btn btn-primary">Try again</button>
+      </div>
+    </section>
+
+    <section id="state-empty" class="state-panel" hidden>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4zM4 7v10l8 4 8-4V7M12 11v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <h2>No jobs match those filters</h2>
+        <p>Try widening your search or clearing a filter.</p>
+        <button id="empty-clear-button" class="btn btn-primary">Clear filters</button>
+      </div>
+    </section>
+
+    <section id="job-grid" class="job-grid" aria-live="polite"></section>
+
+    <nav id="pagination" class="pagination" aria-label="Pagination" hidden></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Shared informally — always verify details before applying.</p>
+    </div>
+  </footer>
+
+  <div id="job-modal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button id="modal-close" class="modal-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
