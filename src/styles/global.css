@@ -163,9 +163,16 @@ svg { display: block; flex-shrink: 0; }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 4px 18px 18px;
+  padding: 4px 18px 8px;
+  max-height: calc(100vh - 108px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .filters-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -568,6 +575,144 @@ svg { display: block; flex-shrink: 0; }
 }
 .modal-foot .spacer { flex: 1; }
 
+
+/* ==========================================================================
+   Track switch (segmented control)
+   ========================================================================== */
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  margin-bottom: 14px;
+  background: var(--slate-bg);
+  border-radius: var(--radius);
+}
+.segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: background 0.15s, color 0.15s;
+}
+.segment:hover { color: var(--text); }
+.segment.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border);
+}
+.segment-count { font-size: 12px; color: var(--text-3); font-weight: 400; }
+.segment.active .segment-count { color: var(--accent); font-weight: 600; }
+
+/* ==========================================================================
+   Filter sections + checklists
+   ========================================================================== */
+.filter-section { border-bottom: 1px solid var(--border); }
+.filter-section:last-child { border-bottom: 0; }
+.filter-section summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.filter-section summary::-webkit-details-marker { display: none; }
+.filter-section summary::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 2px solid var(--text-3);
+  border-bottom: 2px solid var(--text-3);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.15s;
+}
+.filter-section[open] summary::after { transform: rotate(-135deg); }
+.filter-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+.filter-section-body { padding-bottom: 14px; }
+
+.checklist-search { position: relative; margin-bottom: 8px; }
+.checklist-search svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 15px;
+  height: 15px;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+.checklist-search .input { height: 34px; padding-left: 32px; font-size: 13px; }
+
+.checklist-items { list-style: none; margin: 0; padding: 0; }
+.checklist .btn-link { margin-top: 6px; }
+.checklist-empty { padding: 6px 0; font-size: 13px; color: var(--text-3); }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+.check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.check-label { flex: 1; min-width: 0; color: var(--text); overflow-wrap: anywhere; }
+.check-count { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.check-toggle { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.check-toggle .check-label { font-size: 13px; color: var(--text-2); }
+
+/* ==========================================================================
+   Tags on cards / modal
+   ========================================================================== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.job-categories { margin-top: 10px; }
+.job-skills { margin-top: 12px; }
+.tag-primary { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.tag-more { background: transparent; border: 1px dashed var(--border-strong); color: var(--text-3); }
+.job-skills .tag {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-weight: 400;
+}
+.job-meta { margin-top: 10px; }
+.job-meta-item.is-muted { color: var(--text-3); }
+.job-snippet { margin-top: 10px; }
+.modal-section .tag-row { gap: 8px; }
+.modal-section .tag { height: 28px; padding: 0 11px; font-size: 13px; }
+
 /* ==========================================================================
    Footer
    ========================================================================== */
@@ -579,7 +724,7 @@ svg { display: block; flex-shrink: 0; }
    ========================================================================== */
 @media (max-width: 900px) {
   .board { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .filters { position: static; padding-bottom: 4px; }
+  .filters { position: static; padding-bottom: 4px; max-height: none; overflow: visible; }
   .filters-header { border-bottom: 0; padding: 10px 0; }
   .btn.filters-toggle { display: inline-flex; }
   .filters-body { display: none; padding-bottom: 14px; }

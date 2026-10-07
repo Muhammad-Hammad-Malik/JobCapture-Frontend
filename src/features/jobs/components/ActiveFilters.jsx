@@ -1,13 +1,21 @@
 import { CloseIcon } from '@/components/ui/Icons.jsx';
-import { capitalize } from '@/utils/format';
+import { EXPERIENCE_OPTIONS, REMOTE_OPTIONS } from '../constants';
 
+const labelOf = (options, value) => options.find(o => o.value === value)?.label || value;
+
+// One chip per active value. The track switch is shown in its own control, so it isn't a chip.
 export function getActiveChips(filters) {
   const chips = [];
-  if (filters.search) chips.push({ key: 'search', label: `“${filters.search}”` });
-  if (filters.stack) chips.push({ key: 'stack', label: filters.stack });
-  if (filters.remoteType) chips.push({ key: 'remoteType', label: capitalize(filters.remoteType) });
-  if (filters.minExperience !== '') chips.push({ key: 'minExperience', label: `${filters.minExperience}+ yrs min` });
-  if (filters.maxExperience !== '') chips.push({ key: 'maxExperience', label: `${filters.maxExperience} yrs max` });
+  if (filters.search) chips.push({ key: 'search', value: filters.search, label: `“${filters.search}”` });
+  filters.categories.forEach(v => chips.push({ key: 'categories', value: v, label: v }));
+  filters.skills.forEach(v => chips.push({ key: 'skills', value: v, label: v }));
+  filters.cities.forEach(v =>
+    chips.push({ key: 'cities', value: v, label: v === 'unspecified' ? 'City: Not specified' : v }),
+  );
+  filters.remoteType.forEach(v => chips.push({ key: 'remoteType', value: v, label: labelOf(REMOTE_OPTIONS, v) }));
+  filters.experience.forEach(v =>
+    chips.push({ key: 'experience', value: v, label: `Exp: ${labelOf(EXPERIENCE_OPTIONS, v)}` }),
+  );
   return chips;
 }
 
@@ -16,9 +24,9 @@ export default function ActiveFilters({ chips, onRemove }) {
   return (
     <div className="active-filters">
       {chips.map(chip => (
-        <span className="chip" key={chip.key}>
+        <span className="chip" key={`${chip.key}:${chip.value}`}>
           {chip.label}
-          <button aria-label={`Remove filter ${chip.label}`} onClick={() => onRemove(chip.key, '')}>
+          <button aria-label={`Remove filter ${chip.label}`} onClick={() => onRemove(chip.key, chip.value)}>
             <CloseIcon />
           </button>
         </span>

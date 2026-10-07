@@ -33,7 +33,18 @@ export function useJobs() {
     status,
     result,
     error,
+    // Change several filter fields at once; always returns to page 1.
+    patchFilters: patch => setFilters(f => ({ ...f, ...patch, page: 1 })),
     updateFilter: (key, value) => setFilters(f => ({ ...f, [key]: value, page: 1 })),
+    // Add/remove one value of a multi-select filter.
+    toggleValue: (key, value) =>
+      setFilters(f => ({
+        ...f,
+        [key]: f[key].includes(value) ? f[key].filter(v => v !== value) : [...f[key], value],
+        page: 1,
+      })),
+    removeValue: (key, value) =>
+      setFilters(f => ({ ...f, [key]: Array.isArray(f[key]) ? f[key].filter(v => v !== value) : '', page: 1 })),
     clearFilters: () => setFilters({ ...EMPTY_FILTERS, page: 1 }),
     goToPage: page => setFilters(f => ({ ...f, page })),
     retry: () => setReloadToken(t => t + 1),

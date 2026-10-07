@@ -23,7 +23,7 @@ Set `VITE_API_BASE_URL` to wherever the [backend](https://github.com/Muhammad-Ha
 
 ## Features
 
-- Search (title/company/description) and filters (stack, work type, experience range), synced to the URL so filtered views are shareable/bookmarkable.
+- Tech / Non-tech switch, search, and multi-select filters (category, skills with optional match-all, city, work type, experience including "Not specified"), each with live counts. All filters are synced to the URL so filtered views are shareable/bookmarkable.
 - Responsive card grid with pagination, loading skeletons, and empty/error states.
 - Click-through detail modal with description, contact/apply links, and a link back to the original LinkedIn post (when available).
 - Only shows active (`open`, non-cleared) jobs — closing or clearing a job in the admin app removes it from here immediately.

@@ -1,7 +1,9 @@
 import CompanyAvatar from './CompanyAvatar.jsx';
 import CompanyLine from './CompanyLine.jsx';
+import JobTags from './JobTags.jsx';
 import { BriefcaseIcon, ChevronRightIcon, PinIcon } from '@/components/ui/Icons.jsx';
 import { capitalize, relativeTime } from '@/utils/format';
+import { citiesLabel, experienceLabel } from '../utils/jobDisplay';
 
 export default function JobCard({ job, onOpen }) {
   const handleKeyDown = e => {
@@ -10,6 +12,9 @@ export default function JobCard({ job, onOpen }) {
       onOpen(job);
     }
   };
+
+  const experience = experienceLabel(job.experienceYears);
+  const city = citiesLabel(job.cities);
 
   return (
     <article
@@ -26,16 +31,19 @@ export default function JobCard({ job, onOpen }) {
         <h3 className="job-title">{job.jobTitle}</h3>
         <p className="job-company"><CompanyLine job={job} /></p>
 
+        <JobTags items={job.categories} max={3} primary className="job-categories" />
+
         <div className="job-meta">
-          {job.stack && <span className="tag">{job.stack}</span>}
           {job.remoteType && <span className="tag" data-kind={job.remoteType}>{capitalize(job.remoteType)}</span>}
-          {job.experienceYears != null && (
-            <span className="job-meta-item"><BriefcaseIcon />{job.experienceYears}+ yrs</span>
-          )}
-          {job.location && <span className="job-meta-item"><PinIcon />{job.location}</span>}
+          {city && <span className="job-meta-item"><PinIcon />{city}</span>}
+          <span className={`job-meta-item${experience ? '' : ' is-muted'}`}>
+            <BriefcaseIcon />{experience || 'Experience not specified'}
+          </span>
         </div>
 
         {job.description && <p className="job-snippet">{job.description}</p>}
+
+        <JobTags items={job.skills} max={5} className="job-skills" />
       </div>
 
       <div className="job-aside">

@@ -1,11 +1,46 @@
 import { useState } from 'react';
-import DebouncedInput from '@/components/ui/DebouncedInput.jsx';
+import MultiCheckList from '@/components/ui/MultiCheckList.jsx';
 import { FilterIcon } from '@/components/ui/Icons.jsx';
-import { STACK_OPTIONS } from '../constants';
+import { EXPERIENCE_OPTIONS, REMOTE_OPTIONS } from '../constants';
 
-// Sidebar on desktop, collapsible panel on small screens.
-export default function FilterBar({ filters, activeCount, onChange, onClear }) {
+function Section({ title, badge, defaultOpen = true, children }) {
+  return (
+    <details className="filter-section" open={defaultOpen}>
+      <summary>
+        <span>{title}</span>
+        {badge > 0 && <span className="filter-badge">{badge}</span>}
+      </summary>
+      <div className="filter-section-body">{children}</div>
+    </details>
+  );
+}
+
+const byCount = (a, b) => b.count - a.count || a.label.localeCompare(b.label);
+
+// Sidebar on desktop, collapsible panel on small screens. All lists are multi-select (match ANY).
+export default function FilterBar({ filters, facets, activeCount, onToggle, onUpdate, onClear }) {
   const [open, setOpen] = useState(false);
+
+  const categoryOptions = (facets?.categories || [])
+    .filter(c => !filters.track || c.track === filters.track)
+    .filter(c => c.count > 0 || filters.categories.includes(c.name))
+    .map(c => ({ value: c.name, label: c.name, count: c.count }))
+    .sort(byCount);
+
+  const skillOptions = (facets?.skills || [])
+    .filter(s => s.count > 0 || filters.skills.includes(s.name))
+    .map(s => ({ value: s.name, label: s.name, count: s.count }))
+    .sort(byCount);
+
+  // "Not specified" = posts that name no city. Pinned to the top so it is easy to find.
+  const cityOptions = [
+    ...(facets?.citiesUnspecified > 0 || filters.cities.includes('unspecified')
+      ? [{ value: 'unspecified', label: 'Not specified', count: facets?.citiesUnspecified ?? 0 }]
+      : []),
+    ...(facets?.cities || []).map(c => ({ value: c.name, label: c.name, count: c.count })),
+  ];
+
+  const withCounts = (options, counts) => options.map(o => ({ ...o, count: counts?.[o.value] ?? 0 }));
 
   return (
     <aside className={`filters${open ? ' open' : ''}`} aria-label="Filters">
@@ -26,48 +61,67 @@ export default function FilterBar({ filters, activeCount, onChange, onClear }) {
       </div>
 
       <div className="filters-body" id="filters-body">
-        <div className="field">
-          <label htmlFor="filter-stack">Stack</label>
-          <select id="filter-stack" className="select" value={filters.stack} onChange={e => onChange('stack', e.target.value)}>
-            <option value="">All stacks</option>
-            {STACK_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
+        <Section title="Category" badge={filters.categories.length}>
+          <MultiCheckList
+            name="category"
+            options={categoryOptions}
+            selected={filters.categories}
+            onToggle={v => onToggle('categories', v)}
+            initialVisible={8}
+          />
+        </Section>
 
-        <div className="field">
-          <label htmlFor="filter-remote">Work type</label>
-          <select id="filter-remote" className="select" value={filters.remoteType} onChange={e => onChange('remoteType', e.target.value)}>
-            <option value="">Any</option>
-            <option value="remote">Remote</option>
-            <option value="hybrid">Hybrid</option>
-            <option value="onsite">Onsite</option>
-          </select>
-        </div>
+        <Section title="Skills" badge={filters.skills.length}>
+          <MultiCheckList
+            name="skill"
+            options={skillOptions}
+            selected={filters.skills}
+            onToggle={v => onToggle('skills', v)}
+            searchable
+            searchPlaceholder="Search skills (e.g. Laravel)"
+            initialVisible={10}
+          />
+          {filters.skills.length > 1 && (
+            <label className="check check-toggle">
+              <input
+                type="checkbox"
+                checked={filters.skillsMatch === 'all'}
+                onChange={e => onUpdate('skillsMatch', e.target.checked ? 'all' : 'any')}
+              />
+              <span className="check-label">Must have all selected skills</span>
+            </label>
+          )}
+        </Section>
 
-        <div className="field">
-          <span className="field-label" id="exp-label">Experience (years)</span>
-          <div className="range" role="group" aria-labelledby="exp-label">
-            <DebouncedInput
-              className="input"
-              type="number"
-              min="0"
-              placeholder="Min"
-              aria-label="Minimum years of experience"
-              value={filters.minExperience}
-              onCommit={v => onChange('minExperience', v)}
-            />
-            <span className="range-sep" aria-hidden="true">–</span>
-            <DebouncedInput
-              className="input"
-              type="number"
-              min="0"
-              placeholder="Max"
-              aria-label="Maximum years of experience"
-              value={filters.maxExperience}
-              onCommit={v => onChange('maxExperience', v)}
-            />
-          </div>
-        </div>
+        <Section title="City" badge={filters.cities.length}>
+          <MultiCheckList
+            name="city"
+            options={cityOptions}
+            selected={filters.cities}
+            onToggle={v => onToggle('cities', v)}
+            searchable={cityOptions.length > 10}
+            searchPlaceholder="Search cities"
+            initialVisible={8}
+          />
+        </Section>
+
+        <Section title="Work type" badge={filters.remoteType.length}>
+          <MultiCheckList
+            name="remote"
+            options={withCounts(REMOTE_OPTIONS, facets?.remoteTypes)}
+            selected={filters.remoteType}
+            onToggle={v => onToggle('remoteType', v)}
+          />
+        </Section>
+
+        <Section title="Experience" badge={filters.experience.length}>
+          <MultiCheckList
+            name="experience"
+            options={withCounts(EXPERIENCE_OPTIONS, facets?.experience)}
+            selected={filters.experience}
+            onToggle={v => onToggle('experience', v)}
+          />
+        </Section>
       </div>
     </aside>
   );

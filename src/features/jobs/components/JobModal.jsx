@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import CompanyAvatar from './CompanyAvatar.jsx';
 import CompanyLine from './CompanyLine.jsx';
+import JobTags from './JobTags.jsx';
 import { CloseIcon, ExternalIcon, MailIcon } from '@/components/ui/Icons.jsx';
 import { capitalize } from '@/utils/format';
+import { experienceLabel } from '../utils/jobDisplay';
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -26,10 +28,12 @@ export default function JobModal({ job, onClose }) {
   }, [onClose]);
 
   const facts = [
-    { label: 'Work type', value: job.remoteType && capitalize(job.remoteType) },
-    { label: 'Experience', value: job.experienceYears != null && `${job.experienceYears}+ years` },
-    { label: 'Stack', value: job.stack },
-    { label: 'Location', value: job.location },
+    { label: 'Work type', value: job.remoteType ? capitalize(job.remoteType) : 'Not specified' },
+    {
+      label: 'Experience',
+      value: job.experienceYears == null ? 'Not specified' : experienceLabel(job.experienceYears),
+    },
+    { label: 'Location', value: job.cities?.length ? job.cities.join(', ') : 'Not specified' },
     { label: 'Posted', value: formatDate(job.createdAt) },
   ].filter(f => f.value);
 
@@ -64,6 +68,20 @@ export default function JobModal({ job, onClose }) {
                 </div>
               ))}
             </dl>
+          )}
+
+          {job.categories?.length > 0 && (
+            <div className="modal-section">
+              <h3>Categories</h3>
+              <JobTags items={job.categories} max={job.categories.length} primary />
+            </div>
+          )}
+
+          {job.skills?.length > 0 && (
+            <div className="modal-section">
+              <h3>Skills</h3>
+              <JobTags items={job.skills} max={job.skills.length} />
+            </div>
           )}
 
           <div className="modal-section">

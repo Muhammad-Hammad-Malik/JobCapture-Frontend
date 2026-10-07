@@ -9,12 +9,18 @@ import {
   JobCard,
   JobModal,
   SearchBar,
+  TrackSwitch,
   getActiveChips,
+  useFacets,
   useJobs,
 } from '@/features/jobs';
 
 export default function HomePage() {
-  const { filters, status, result, error, updateFilter, clearFilters, goToPage, retry } = useJobs();
+  const {
+    filters, status, result, error,
+    patchFilters, updateFilter, toggleValue, removeValue, clearFilters, goToPage, retry,
+  } = useJobs();
+  const facets = useFacets();
   const [selectedJob, setSelectedJob] = useState(null);
   const closeModal = useCallback(() => setSelectedJob(null), []);
 
@@ -32,6 +38,13 @@ export default function HomePage() {
     );
   }
 
+  // Switching track drops any selected categories that belong to the other track.
+  const handleTrack = track => {
+    const trackOf = Object.fromEntries((facets?.categories || []).map(c => [c.name, c.track]));
+    const categories = track ? filters.categories.filter(c => trackOf[c] === track) : filters.categories;
+    patchFilters({ track, categories });
+  };
+
   const handlePage = page => {
     goToPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -48,14 +61,22 @@ export default function HomePage() {
         </div>
 
         <div className="board">
-          <FilterBar filters={filters} activeCount={chips.length} onChange={updateFilter} onClear={clearFilters} />
+          <FilterBar
+            filters={filters}
+            facets={facets}
+            activeCount={chips.length}
+            onToggle={toggleValue}
+            onUpdate={updateFilter}
+            onClear={clearFilters}
+          />
 
           <section aria-label="Results">
+            <TrackSwitch value={filters.track} counts={facets?.tracks} total={facets?.total} onChange={handleTrack} />
             <SearchBar value={filters.search} onCommit={v => updateFilter('search', v)} />
 
             <div className="results-bar">
               <p className="results-count" aria-live="polite">{countNode}</p>
-              <ActiveFilters chips={chips} onRemove={updateFilter} />
+              <ActiveFilters chips={chips} onRemove={removeValue} />
             </div>
 
             {status === 'loading' && (
