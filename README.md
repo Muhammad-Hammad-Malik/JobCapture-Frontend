@@ -1,20 +1,25 @@
 # JobCapture Frontend
 
-Public, read-only job board. Plain HTML/CSS/JS — no build step, no framework.
+Public, read-only job board. React + Vite single-page app.
 
 ## Running locally
 
-Serve the folder statically and open it, e.g.:
-
 ```bash
-npx serve .
+npm install
+npm run dev
 ```
 
-Then visit the printed local URL.
+`npm run dev` reads `.env.development`, which points at the local backend (`http://localhost:3000`).
 
 ## Configuration
 
-Edit `js/config.js` and set `API_BASE_URL` to wherever the [backend](https://github.com/Muhammad-Hammad-Malik/JobCapture-Backend) is running/deployed. It defaults to `http://localhost:3000` for local development.
+Set `VITE_API_BASE_URL` to wherever the [backend](https://github.com/Muhammad-Hammad-Malik/JobCapture-Backend) is running. If unset, production builds fall back to `https://job-capture-backend.vercel.app`. See `.env.example`.
+
+## Build / deploy (Vercel)
+
+- Framework preset: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
 
 ## Features
 
