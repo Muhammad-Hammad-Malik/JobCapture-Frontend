@@ -2,7 +2,16 @@ import { useCallback, useState } from 'react';
 import Header from '@/components/layout/Header.jsx';
 import Footer from '@/components/layout/Footer.jsx';
 import Pagination from '@/components/ui/Pagination.jsx';
-import { FilterBar, JobCard, JobModal, useJobs } from '@/features/jobs';
+import { AlertIcon, InboxIcon } from '@/components/ui/Icons.jsx';
+import {
+  ActiveFilters,
+  FilterBar,
+  JobCard,
+  JobModal,
+  SearchBar,
+  getActiveChips,
+  useJobs,
+} from '@/features/jobs';
 
 export default function HomePage() {
   const { filters, status, result, error, updateFilter, clearFilters, goToPage, retry } = useJobs();
@@ -10,14 +19,17 @@ export default function HomePage() {
   const closeModal = useCallback(() => setSelectedJob(null), []);
 
   const jobs = result?.data ?? [];
+  const chips = getActiveChips(filters);
   const isEmpty = status === 'results' && jobs.length === 0;
   const showResults = status === 'results' && jobs.length > 0;
 
-  let countText = '';
+  let countNode = null;
   if (showResults) {
     const start = (result.page - 1) * result.limit + 1;
     const end = Math.min(result.page * result.limit, result.total);
-    countText = `Showing ${start}-${end} of ${result.total} job${result.total === 1 ? '' : 's'}`;
+    countNode = (
+      <>Showing <strong>{start}–{end}</strong> of <strong>{result.total}</strong> role{result.total === 1 ? '' : 's'}</>
+    );
   }
 
   const handlePage = page => {
@@ -30,50 +42,56 @@ export default function HomePage() {
       <Header />
 
       <main className="container">
-        <FilterBar filters={filters} onChange={updateFilter} onClear={clearFilters} />
-
-        <div className="results-meta">
-          <p aria-live="polite">{countText}</p>
+        <div className="page-head">
+          <h1 className="page-title">Open roles</h1>
+          <p className="page-sub">Fresh openings shared by people we know, updated as they come in.</p>
         </div>
 
-        {status === 'loading' && (
-          <section className="state-panel">
-            <div className="skeleton-grid">
-              {Array.from({ length: 6 }, (_, i) => <div className="skeleton-card" key={i}></div>)}
-            </div>
-          </section>
-        )}
+        <div className="board">
+          <FilterBar filters={filters} activeCount={chips.length} onChange={updateFilter} onClear={clearFilters} />
 
-        {status === 'error' && (
-          <section className="state-panel">
-            <div className="empty-state">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M12 8v5M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-              <h2>Couldn't load jobs</h2>
-              <p>{error}</p>
-              <button className="btn btn-primary" onClick={retry}>Try again</button>
-            </div>
-          </section>
-        )}
+          <section aria-label="Results">
+            <SearchBar value={filters.search} onCommit={v => updateFilter('search', v)} />
 
-        {isEmpty && (
-          <section className="state-panel">
-            <div className="empty-state">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4zM4 7v10l8 4 8-4V7M12 11v10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /></svg>
-              <h2>No jobs match those filters</h2>
-              <p>Try widening your search or clearing a filter.</p>
-              <button className="btn btn-primary" onClick={clearFilters}>Clear filters</button>
+            <div className="results-bar">
+              <p className="results-count" aria-live="polite">{countNode}</p>
+              <ActiveFilters chips={chips} onRemove={updateFilter} />
             </div>
-          </section>
-        )}
 
-        {showResults && (
-          <>
-            <section className="job-grid" aria-live="polite">
-              {jobs.map(job => <JobCard key={job._id} job={job} onOpen={setSelectedJob} />)}
-            </section>
-            <Pagination page={result.page} totalPages={result.totalPages} onPage={handlePage} />
-          </>
-        )}
+            {status === 'loading' && (
+              <div className="job-list" aria-busy="true">
+                {Array.from({ length: 5 }, (_, i) => <div className="skeleton" key={i} />)}
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div className="state" role="alert">
+                <div className="state-icon is-error"><AlertIcon /></div>
+                <h2>Couldn’t load jobs</h2>
+                <p>{error}</p>
+                <button className="btn btn-primary" onClick={retry}>Try again</button>
+              </div>
+            )}
+
+            {isEmpty && (
+              <div className="state">
+                <div className="state-icon"><InboxIcon /></div>
+                <h2>No roles match your search</h2>
+                <p>Try different keywords or remove some filters to see more results.</p>
+                <button className="btn btn-primary" onClick={clearFilters}>Clear all filters</button>
+              </div>
+            )}
+
+            {showResults && (
+              <>
+                <div className="job-list">
+                  {jobs.map(job => <JobCard key={job._id} job={job} onOpen={setSelectedJob} />)}
+                </div>
+                <Pagination page={result.page} totalPages={result.totalPages} onPage={handlePage} />
+              </>
+            )}
+          </section>
+        </div>
       </main>
 
       <Footer />

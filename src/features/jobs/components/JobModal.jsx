@@ -1,57 +1,97 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import CompanyAvatar from './CompanyAvatar.jsx';
 import CompanyLine from './CompanyLine.jsx';
+import { CloseIcon, ExternalIcon, MailIcon } from '@/components/ui/Icons.jsx';
 import { capitalize } from '@/utils/format';
 
+function formatDate(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 export default function JobModal({ job, onClose }) {
+  const dialogRef = useRef(null);
+
   useEffect(() => {
+    const previouslyFocused = document.activeElement;
     const onKey = e => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      previouslyFocused?.focus?.();
     };
   }, [onClose]);
 
-  const hasLinks = job.applicationLink || job.contactEmail || job.sourceUrl;
+  const facts = [
+    { label: 'Work type', value: job.remoteType && capitalize(job.remoteType) },
+    { label: 'Experience', value: job.experienceYears != null && `${job.experienceYears}+ years` },
+    { label: 'Stack', value: job.stack },
+    { label: 'Location', value: job.location },
+    { label: 'Posted', value: formatDate(job.createdAt) },
+  ].filter(f => f.value);
+
+  const hasFooter = job.applicationLink || job.contactEmail || job.sourceUrl;
 
   return (
     <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <button className="modal-close" aria-label="Close" onClick={onClose}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-        </button>
-        <div className="modal-body">
-          <h2 id="modal-title" className="modal-title">{job.jobTitle}</h2>
-          <p className="modal-company">
-            <CompanyLine job={job} />{job.location ? ` · ${job.location}` : ''}
-          </p>
-          <div className="modal-badges">
-            <span className="badge">{job.stack}</span>
-            {job.remoteType && <span className="badge badge-remote">{capitalize(job.remoteType)}</span>}
-            {job.experienceYears != null && <span className="badge badge-exp">{job.experienceYears}+ yrs experience</span>}
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        tabIndex={-1}
+        ref={dialogRef}
+      >
+        <div className="modal-head">
+          <CompanyAvatar name={job.company} large />
+          <div className="modal-head-text">
+            <h2 id="modal-title" className="modal-title">{job.jobTitle}</h2>
+            <p className="modal-company"><CompanyLine job={job} /></p>
           </div>
+          <button className="modal-close" aria-label="Close" onClick={onClose}><CloseIcon /></button>
+        </div>
+
+        <div className="modal-body">
+          {facts.length > 0 && (
+            <dl className="facts">
+              {facts.map(f => (
+                <div className="fact" key={f.label}>
+                  <dt>{f.label}</dt>
+                  <dd>{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
           <div className="modal-section">
-            <h3>Description</h3>
+            <h3>About the role</h3>
             <p className="modal-description">{job.description || 'No description provided.'}</p>
           </div>
-          {hasLinks && (
-            <div className="modal-section">
-              <h3>Get in touch</h3>
-              <div className="modal-links">
-                {job.applicationLink && (
-                  <a href={job.applicationLink} target="_blank" rel="noopener noreferrer">Apply</a>
-                )}
-                {job.contactEmail && (
-                  <a className="link-secondary" href={`mailto:${job.contactEmail}`}>{job.contactEmail}</a>
-                )}
-                {job.sourceUrl && (
-                  <a className="link-secondary" href={job.sourceUrl} target="_blank" rel="noopener noreferrer">View original post</a>
-                )}
-              </div>
-            </div>
-          )}
         </div>
+
+        {hasFooter && (
+          <div className="modal-foot">
+            {job.applicationLink && (
+              <a className="btn btn-primary" href={job.applicationLink} target="_blank" rel="noopener noreferrer">
+                Apply now <ExternalIcon />
+              </a>
+            )}
+            {job.contactEmail && (
+              <a className={`btn ${job.applicationLink ? 'btn-secondary' : 'btn-primary'}`} href={`mailto:${job.contactEmail}`}>
+                <MailIcon /> {job.contactEmail}
+              </a>
+            )}
+            <span className="spacer" />
+            {job.sourceUrl && (
+              <a className="btn btn-link" href={job.sourceUrl} target="_blank" rel="noopener noreferrer">
+                View original post
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

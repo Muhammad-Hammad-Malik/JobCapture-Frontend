@@ -1,12 +1,14 @@
+import { BriefcaseIcon } from '@/components/ui/Icons.jsx';
+
 export default function Header() {
   return (
-    <header className="site-header">
-      <div className="container header-inner">
+    <header className="topbar">
+      <div className="container topbar-inner">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true"></span>
+          <span className="brand-mark"><BriefcaseIcon /></span>
           <span className="brand-name">JobCapture</span>
         </div>
-        <p className="tagline">Fresh openings shared by people we know — updated as they come in.</p>
+        <span className="topbar-note">Roles shared by people we know</span>
       </div>
     </header>
   );
