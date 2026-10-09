@@ -37,3 +37,16 @@ export async function fetchAnalytics(params, signal) {
   if (!response.ok) throw new Error(body?.message || `Request failed (${response.status})`);
   return body;
 }
+
+export async function adminRequest(path, { method = 'GET', body, params } = {}) {
+  const query = params ? `?${new URLSearchParams(params)}` : '';
+  const response = await fetch(`${API_BASE_URL}${path}${query}`, {
+    method,
+    headers: { Authorization: `Bearer ${getToken()}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (response.status === 401) throw new UnauthorizedError('Session expired.');
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.message || `Request failed (${response.status})`);
+  return data;
+}

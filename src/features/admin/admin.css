@@ -87,3 +87,16 @@
   .adm-grid, .adm-grid.two { grid-template-columns: 1fr; }
   .adm-presets { flex-wrap: wrap; }
 }
+
+.adm-tabs { display: flex; gap: 4px; max-width: 1240px; margin: 0 auto; padding: 12px 24px 0; }
+.adm-tabs button { height: 36px; padding: 0 16px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-2); }
+.adm-tabs button.is-on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.adm-actions { display: inline-flex; gap: 6px; }
+.adm-actions .btn { height: 32px; padding: 0 12px; font-size: 13px; }
+.adm-merge { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 14px; }
+.adm-picker label { display: grid; gap: 6px; font-size: 13px; color: var(--text-2); }
+.adm-picker input { height: 38px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-2); }
+.adm-options { list-style: none; margin: 6px 0 0; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }
+.adm-options button { width: 100%; text-align: left; padding: 8px 10px; border: 0; background: none; }
+.adm-options button:hover { background: var(--slate-bg); }
+.adm-options small { color: var(--text-3); margin-left: 6px; }
