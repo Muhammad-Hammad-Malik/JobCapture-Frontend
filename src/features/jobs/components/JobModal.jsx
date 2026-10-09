@@ -3,6 +3,7 @@ import CompanyAvatar from './CompanyAvatar.jsx';
 import CompanyLine from './CompanyLine.jsx';
 import JobTags from './JobTags.jsx';
 import { CloseIcon, ExternalIcon, MailIcon } from '@/components/ui/Icons.jsx';
+import { jobProps, track } from '@/features/analytics';
 import { capitalize } from '@/utils/format';
 import { experienceLabel } from '../utils/jobDisplay';
 
@@ -93,18 +94,18 @@ export default function JobModal({ job, onClose }) {
         {hasFooter && (
           <div className="modal-foot">
             {job.applicationLink && (
-              <a className="btn btn-primary" href={job.applicationLink} target="_blank" rel="noopener noreferrer">
+              <a className="btn btn-primary" href={job.applicationLink} target="_blank" rel="noopener noreferrer" onClick={() => track('apply_click', jobProps(job))}>
                 Apply now <ExternalIcon />
               </a>
             )}
             {job.contactEmail && (
-              <a className={`btn ${job.applicationLink ? 'btn-secondary' : 'btn-primary'}`} href={`mailto:${job.contactEmail}`}>
+              <a className={`btn ${job.applicationLink ? 'btn-secondary' : 'btn-primary'}`} href={`mailto:${job.contactEmail}`} onClick={() => track('email_click', jobProps(job))}>
                 <MailIcon /> {job.contactEmail}
               </a>
             )}
             <span className="spacer" />
             {job.sourceUrl && (
-              <a className="btn btn-link" href={job.sourceUrl} target="_blank" rel="noopener noreferrer">
+              <a className="btn btn-link" href={job.sourceUrl} target="_blank" rel="noopener noreferrer" onClick={() => track('source_click', jobProps(job))}>
                 View original post
               </a>
             )}

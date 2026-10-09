@@ -3,6 +3,7 @@ import Header from '@/components/layout/Header.jsx';
 import Footer from '@/components/layout/Footer.jsx';
 import Pagination from '@/components/ui/Pagination.jsx';
 import { AlertIcon, InboxIcon } from '@/components/ui/Icons.jsx';
+import { jobProps, track } from '@/features/analytics';
 import {
   ActiveFilters,
   FilterBar,
@@ -23,6 +24,10 @@ export default function HomePage() {
   const facets = useFacets();
   const [selectedJob, setSelectedJob] = useState(null);
   const closeModal = useCallback(() => setSelectedJob(null), []);
+  const openJob = useCallback(job => {
+    track('job_open', jobProps(job));
+    setSelectedJob(job);
+  }, []);
 
   const jobs = result?.data ?? [];
   const chips = getActiveChips(filters);
@@ -106,7 +111,7 @@ export default function HomePage() {
             {showResults && (
               <>
                 <div className="job-list">
-                  {jobs.map(job => <JobCard key={job._id} job={job} onOpen={setSelectedJob} />)}
+                  {jobs.map(job => <JobCard key={job._id} job={job} onOpen={openJob} />)}
                 </div>
                 <Pagination page={result.page} totalPages={result.totalPages} onPage={handlePage} />
               </>

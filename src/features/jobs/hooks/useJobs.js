@@ -1,7 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { track } from '@/features/analytics';
 import { fetchJobs } from '../api/jobsApi';
 import { EMPTY_FILTERS, PAGE_SIZE } from '../constants';
 import { readFiltersFromUrl, writeFiltersToUrl } from '../utils/filtersUrl';
+
+const FILTER_KEYS = ['categories', 'skills', 'cities', 'remoteType', 'experience'];
+
+// Records what people searched/filtered for (and how many results it gave) — once per change.
+function trackFilterChanges(prev, next, total) {
+  if (!prev) return;
+  const q = next.search.trim();
+  if (q.length >= 2 && q !== prev.search.trim()) track('search', { q: q.slice(0, 100), results: total });
+  if (next.track !== prev.track) track('track_switch', { track: next.track || 'all' });
+  for (const key of FILTER_KEYS) {
+    if (JSON.stringify(next[key]) !== JSON.stringify(prev[key]) && next[key].length) {
+      track('filter', { key, values: next[key], results: total });
+    }
+  }
+  if (next.page !== prev.page) track('page_change', { page: next.page });
+}
 
 // Owns the filter state (synced to the URL) and the fetched job list.
 export function useJobs() {
@@ -10,6 +27,7 @@ export function useJobs() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
+  const reported = useRef(null); // filters whose results were last reported to analytics
 
   useEffect(() => {
     writeFiltersToUrl(filters);
@@ -19,6 +37,8 @@ export function useJobs() {
       .then(data => {
         setResult(data);
         setStatus('results');
+        trackFilterChanges(reported.current, filters, data.total);
+        reported.current = filters;
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
