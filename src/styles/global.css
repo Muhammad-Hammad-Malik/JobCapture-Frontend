@@ -716,8 +716,6 @@ svg { display: block; flex-shrink: 0; }
 /* ==========================================================================
    Footer
    ========================================================================== */
-.site-footer { border-top: 1px solid var(--border); background: var(--surface); }
-.site-footer p { padding: 22px 0; font-size: 13px; color: var(--text-3); }
 
 /* ==========================================================================
    Responsive

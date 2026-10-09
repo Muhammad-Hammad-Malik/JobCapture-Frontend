@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import Header from '@/components/layout/Header.jsx';
-import Footer from '@/components/layout/Footer.jsx';
 import Pagination from '@/components/ui/Pagination.jsx';
 import { AlertIcon, InboxIcon } from '@/components/ui/Icons.jsx';
 import { jobProps, track } from '@/features/analytics';
@@ -120,7 +119,6 @@ export default function HomePage() {
         </div>
       </main>
 
-      <Footer />
 
       {selectedJob && <JobModal job={selectedJob} onClose={closeModal} />}
     </>

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import Header from '@/components/layout/Header.jsx';
-import Footer from '@/components/layout/Footer.jsx';
 import Pagination from '@/components/ui/Pagination.jsx';
 import DebouncedInput from '@/components/ui/DebouncedInput.jsx';
 import { AlertIcon, InboxIcon, SearchIcon } from '@/components/ui/Icons.jsx';
@@ -83,7 +82,6 @@ export default function CompaniesPage() {
           </>
         )}
       </main>
-      <Footer />
       {openKey && <CompanyModal companyKey={openKey} onClose={closeModal} />}
     </>
   );
