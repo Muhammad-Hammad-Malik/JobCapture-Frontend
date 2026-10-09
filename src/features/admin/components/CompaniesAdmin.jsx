@@ -54,6 +54,13 @@ export default function CompaniesAdmin({ onLogout }) {
     adminRequest(`/api/admin/company-submissions/${id}`, { method: 'PATCH', body: { action } })
       .then(() => { setNotice(`Submission ${action}d.`); load(); }).catch(guard);
 
+  const approveAllSizes = () => {
+    const n = (items || []).filter(i => i.type === 'size' && i.source === 'research').length;
+    if (!n || !window.confirm(`Approve all ${n} researched company sizes? They become public immediately.`)) return;
+    adminRequest('/api/admin/company-submissions/approve-all', { method: 'POST', body: { type: 'size', source: 'research' } })
+      .then(r => { setNotice(`Approved ${r.approved} researched sizes.`); load(); }).catch(guard);
+  };
+
   const merge = () => {
     if (!from || !to || from.key === to.key) return;
     if (!window.confirm(`Merge "${from.name}" into "${to.name}"? Their roles are combined and this cannot be undone.`)) return;
@@ -74,6 +81,9 @@ export default function CompaniesAdmin({ onLogout }) {
             <button key={s} className={status === s ? 'is-on' : ''} onClick={() => setStatus(s)}>{s[0].toUpperCase() + s.slice(1)}</button>
           ))}
         </div>
+        {status === 'pending' && (items || []).some(i => i.source === 'research') && (
+          <p><button className="btn btn-primary" onClick={approveAllSizes}>Approve all researched sizes</button></p>
+        )}
         <Card wide>
           {items === null ? <Empty>Loading…</Empty> : (
             <DataTable
@@ -81,6 +91,10 @@ export default function CompaniesAdmin({ onLogout }) {
                 { key: 'companyName', label: 'Company' },
                 { key: 'type', label: 'Type' },
                 { key: 'value', label: 'Suggested value' },
+                { key: 'source', label: 'From', render: r => (r.source === 'research' ? 'Research' : 'Community') },
+                { key: 'note', label: 'Evidence', render: r => (r.note
+                  ? r.note.split(' | ').map((u, i) => (/^https?:\/\//.test(u) ? <span key={i}><a href={u} target="_blank" rel="noopener noreferrer">source {i + 1}</a>{' '}</span> : <span key={i}>{u} </span>))
+                  : '') },
                 { key: 'createdAt', label: 'Submitted', render: r => new Date(r.createdAt).toLocaleString() },
                 ...(status === 'pending' ? [{ key: 'act', label: '', render: r => (
                   <span className="adm-actions">
